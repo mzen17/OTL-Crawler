@@ -2,30 +2,17 @@ import argparse
 from pathlib import Path
 from typing import Literal
 
-from otlexec import StoreJSResultCommand
 from custom_command import LinkCountingCommand
 from openwpm.command_sequence import CommandSequence
 from openwpm.commands.browser_commands import GetCommand
 from openwpm.config import BrowserParams, ManagerParams
 from openwpm.storage.sql_provider import SQLiteStorageProvider
 from openwpm.task_manager import TaskManager
+from openwpm.commands.prebid import GetPrebids
 
 #################
 # prebid script #
 #################
-script = """const resp = pbjs.getBidResponses();
-
-const pairs = Object
-  .values(resp)  // Parse the values out                          
-  .flatMap(unit =>  // map for iterating through each value, creating a keypair for bidder + bid value (if they exist)
-    unit.bids.map(bid => [
-      bid.adapterCode || bid.bidderCode,   
-      bid.adserverTargeting?.hb_pb          
-    ])
-  );
-return pairs;
-"""
-
 
 sites = [
     "https://www.cnn.com/",
@@ -66,7 +53,6 @@ with TaskManager(
             )
  
         # Parallelize sites over all number of browsers set above.
-        cmd = StoreJSResultCommand(script)
 
         command_sequence = CommandSequence(
             site,
@@ -76,6 +62,8 @@ with TaskManager(
 
         # Start by visiting the page
         command_sequence.append_command(GetCommand(url=site, sleep=3), timeout=60)
-        command_sequence.append_command(LinkCountingCommand())
-        command_sequence.append_command(cmd)
+
+        # get the prebids
+        command_sequence.append_command(GetPrebids())
+        
         manager.execute_command_sequence(command_sequence)

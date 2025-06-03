@@ -33,7 +33,7 @@ class GetPrebids(BaseCommand):
         self.logger = logging.getLogger("openwpm")
 
     def __repr__(self):
-        return f"StoreJSResultCommand({self.script!r})"
+        return f"GetPrebids({self.script!r})"
 
     def execute(
         self,
@@ -44,7 +44,7 @@ class GetPrebids(BaseCommand):
     ) -> None:
         current_url = webdriver.current_url
 
-        time.sleep(5) # delay webdriver from pre-render
+        time.sleep(15) # delay webdriver from pre-render
         result = webdriver.execute_script(self.script)  
         self.logger.info("The bids: %s links on %s", result, current_url)
 

@@ -2,13 +2,17 @@ import argparse
 from pathlib import Path
 from typing import Literal
 
-from custom_command import LinkCountingCommand
+
+# OpenWPM commands imported
 from openwpm.command_sequence import CommandSequence
-from openwpm.commands.browser_commands import GetCommand
+from openwpm.commands.browser_commands import GetCommand, bot_mitigation, SaveScreenshotCommand
+from openwpm.commands.prebid import GetPrebids
+from openwpm.commands.privacy_link_dig import DNSMPISearch
+
+
 from openwpm.config import BrowserParams, ManagerParams
 from openwpm.storage.sql_provider import SQLiteStorageProvider
 from openwpm.task_manager import TaskManager
-from openwpm.commands.prebid import GetPrebids
 
 #################
 # prebid script #
@@ -66,4 +70,9 @@ with TaskManager(
         # get the prebids
         command_sequence.append_command(GetPrebids())
         
+        command_sequence.append_command(DNSMPISearch())
+
+        # save SS to check if working
+        command_sequence.append_command(SaveScreenshotCommand("jpg"))
+
         manager.execute_command_sequence(command_sequence)

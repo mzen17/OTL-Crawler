@@ -42,7 +42,7 @@ class AdSearch(BaseCommand):
     ) -> None:
         current_url = webdriver.current_url
         # let PBJS populate its bid responses
-        time.sleep(5)
+        time.sleep(20)
 
         # grab all adslot keys from PBJS
         adslot_ids = webdriver.execute_script(
@@ -53,9 +53,6 @@ class AdSearch(BaseCommand):
         adslot_ids = list(adslot_ids.keys())
         self.logger.info("Ad slot IDs: %s", adslot_ids)
         
-        # let browser sleep while browser loads ads
-        time.sleep(5)
-
         # exit early if no adslot ids found
         if not adslot_ids:
             self.logger.info("No ad slot IDs found, ending execution.")
@@ -65,21 +62,24 @@ class AdSearch(BaseCommand):
         for slot_id in adslot_ids:
             try:
                 # find the div by id and click it
+                # find the ad slot container
                 slot_div = webdriver.find_element(By.ID, slot_id)
-                # ensure the ad slot div is in view
-                webdriver.execute_script("arguments[0].scrollIntoView(true);", slot_div)
-                # click at the center of the slot div to avoid obstructions
-                webdriver.execute_script("""
-                    var rect = arguments[0].getBoundingClientRect();
-                    var x = rect.left + rect.width / 2;
-                    var y = rect.top + rect.height / 2;
-                    window.scrollTo(x, y);
-                    var el = document.elementFromPoint(x - window.pageXOffset, y - window.pageYOffset);
-                    if(el) el.click();
-                """, slot_div)
-                
 
-                # take a screenshot of the clicked adslot
+                # locate the <iframe> inside the slot and scroll into view
+                iframe = slot_div.find_element(By.TAG_NAME, "iframe")
+
+                webdriver.execute_script("arguments[0].scrollIntoView(true);", iframe)
+                
+                # switch into the iframe context and click inside it
+                webdriver.switch_to.frame(iframe)
+                body = webdriver.find_element(By.TAG_NAME, "body")
+                body.click()
+                time.sleep(2)
+
+                # switch back to the main document
+                webdriver.switch_to.default_content()
+
+                # take a screenshot of the full page (or crop externally if needed)
                 screenshot_name = f"screenshot_{slot_id}.png"
                 pages_dir = manager_params.data_directory / "ads"
                 pages_dir.mkdir(parents=True, exist_ok=True)

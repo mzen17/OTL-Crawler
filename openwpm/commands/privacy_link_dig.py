@@ -75,8 +75,8 @@ class DNSMPISearch(BaseCommand):
 
                 # convert to Markdown
                 converter = html2text.HTML2Text()
-                converter.ignore_images = False
-                converter.ignore_links = False
+                converter.ignore_images = True
+                converter.ignore_links = True
                 markdown = converter.handle(str(body))
 
                 # construct a filename based on the URL

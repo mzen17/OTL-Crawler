@@ -26,7 +26,7 @@ sites = [
 
 NUM_BROWSERS = 1
 manager_params = ManagerParams(num_browsers=NUM_BROWSERS)
-browser_params = [BrowserParams(display_mode="xvfb", bot_mitigation=True) for _ in range(NUM_BROWSERS)]
+browser_params = [BrowserParams(display_mode="headless", bot_mitigation=True) for _ in range(NUM_BROWSERS)]
 
 # Update browser configuration (use this for per-browser settings)
 for browser_param in browser_params:

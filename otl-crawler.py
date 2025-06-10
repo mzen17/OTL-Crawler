@@ -8,6 +8,7 @@ from openwpm.command_sequence import CommandSequence
 from openwpm.commands.browser_commands import GetCommand, bot_mitigation, SaveScreenshotCommand
 from openwpm.commands.prebid import GetPrebids
 from openwpm.commands.privacy_link_dig import DNSMPISearch
+from openwpm.commands.ad_collection import AdSearch
 
 
 from openwpm.config import BrowserParams, ManagerParams
@@ -25,7 +26,7 @@ sites = [
 
 NUM_BROWSERS = 1
 manager_params = ManagerParams(num_browsers=NUM_BROWSERS)
-browser_params = [BrowserParams(display_mode="xvfb") for _ in range(NUM_BROWSERS)]
+browser_params = [BrowserParams(display_mode="xvfb", bot_mitigation=True) for _ in range(NUM_BROWSERS)]
 
 # Update browser configuration (use this for per-browser settings)
 for browser_param in browser_params:
@@ -37,6 +38,7 @@ for browser_param in browser_params:
     browser_param.dns_instrument = True
     browser_param.maximum_profile_size = 1000 * (10**20)  # 50 MB = 50 * 2^20 Bytes
     browser_param.bot_mitigation = True
+    
 
 manager_params.data_directory = Path("./datadir/")
 manager_params.log_path = Path("./datadir/openwpm.log")
@@ -68,9 +70,10 @@ with TaskManager(
         command_sequence.append_command(GetCommand(url=site, sleep=3), timeout=60)
 
         # get the prebids
-        command_sequence.append_command(GetPrebids())
+        # command_sequence.append_command(GetPrebids())
         
-        command_sequence.append_command(DNSMPISearch())
+      #  command_sequence.append_command(DNSMPISearch())
+        command_sequence.append_command(AdSearch())
 
         # save SS to check if working
         command_sequence.append_command(SaveScreenshotCommand("jpg"))
